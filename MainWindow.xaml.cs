@@ -38,9 +38,13 @@ public partial class MainWindow : Window, IBoardHost
     private const int HotkeyBoardId = 0xB0A2;
     private const int HotkeyAmbientId = 0xB0A3;
     private const int HotkeyHiddenId = 0xB0A4;
+    private const int HotkeyQuickNoteId = 0xB0A5;
+    private const int HotkeySnipId = 0xB0A6;
     private const uint VK_D = 0x44;
     private const uint VK_A = 0x41;
     private const uint VK_H = 0x48;
+    private const uint VK_N = 0x4E;
+    private const uint VK_S = 0x53;
 
     private static readonly string LogPath = Path.Combine(AppContext.BaseDirectory, "deskboard-log.txt");
 
@@ -127,6 +131,7 @@ public partial class MainWindow : Window, IBoardHost
         RegisterToggleHotkey();
         LoadBoard();
         Dock.ApplyPositions(_storage.LoadMagnets());
+        StartReminderWatch();
 
         ApplyMode(App.StartInBoardMode ? OverlayMode.Board : OverlayMode.Ambient);
     }
@@ -137,7 +142,9 @@ public partial class MainWindow : Window, IBoardHost
         bool okBoard = NativeMethods.RegisterHotKey(_hwnd, HotkeyBoardId, mods, VK_D);
         bool okAmbient = NativeMethods.RegisterHotKey(_hwnd, HotkeyAmbientId, mods, VK_A);
         bool okHidden = NativeMethods.RegisterHotKey(_hwnd, HotkeyHiddenId, mods, VK_H);
-        Log($"RegisterHotKey D={okBoard} A={okAmbient} H={okHidden}");
+        bool okNote = NativeMethods.RegisterHotKey(_hwnd, HotkeyQuickNoteId, mods, VK_N);
+        bool okSnip = NativeMethods.RegisterHotKey(_hwnd, HotkeySnipId, mods, VK_S);
+        Log($"RegisterHotKey D={okBoard} A={okAmbient} H={okHidden} N={okNote} S={okSnip}");
         if (!okBoard)
             _trayIcon?.ShowBalloonTip(4000, "DeskBoard",
                 "Ctrl+Alt+D is already in use. Use the tray icon to toggle the board.",
@@ -153,6 +160,8 @@ public partial class MainWindow : Window, IBoardHost
                 case HotkeyBoardId: ToggleMode(); handled = true; break;
                 case HotkeyAmbientId: SetBackgroundMode(OverlayMode.Ambient); handled = true; break;
                 case HotkeyHiddenId: SetBackgroundMode(OverlayMode.Hidden); handled = true; break;
+                case HotkeyQuickNoteId: OpenQuickNote(); handled = true; break;
+                case HotkeySnipId: OpenSnip(); handled = true; break;
             }
         }
         return IntPtr.Zero;
@@ -232,6 +241,44 @@ public partial class MainWindow : Window, IBoardHost
 
         Log($"ApplyMode={mode}");
         UpdateTrayIconState();
+        UpdateTodayStrip();
+    }
+
+    // ---- Quick capture (global, works from any mode) ----
+
+    private QuickNoteWindow? _quickNote;
+    private SnipWindow? _snip;
+
+    private void OpenQuickNote()
+    {
+        if (_quickNote is not null) { _quickNote.Activate(); return; }
+
+        _quickNote = new QuickNoteWindow();
+        _quickNote.Committed += text =>
+        {
+            var center = ViewportCenterOnCanvas();
+            double offset = (_noteCascade++ % 6) * 26;
+            CreateNoteAt(new Point(center.X - 105 + offset, center.Y - 95 + offset),
+                text, edit: false);
+        };
+        _quickNote.Closed += (_, _) => _quickNote = null;
+        _quickNote.Show();
+        _quickNote.Activate();
+    }
+
+    private void OpenSnip()
+    {
+        if (_snip is not null) return;
+
+        _snip = new SnipWindow();
+        _snip.Captured += bmp =>
+        {
+            AddImageFromBitmap(bmp);
+            ApplyMode(OverlayMode.Board); // show the result where it landed
+        };
+        _snip.Closed += (_, _) => _snip = null;
+        _snip.Show();
+        _snip.Activate();
     }
 
     // ---- Tool routing ----
@@ -301,6 +348,8 @@ public partial class MainWindow : Window, IBoardHost
             (_, _) => SetBackgroundMode(OverlayMode.Ambient));
         _menuHidden = new WinForms.ToolStripMenuItem("Hide everything (Ctrl+Alt+H)", null,
             (_, _) => SetBackgroundMode(OverlayMode.Hidden));
+        var noteItem = new WinForms.ToolStripMenuItem("Quick note (Ctrl+Alt+N)", null, (_, _) => OpenQuickNote());
+        var snipItem = new WinForms.ToolStripMenuItem("Snip to board (Ctrl+Alt+S)", null, (_, _) => OpenSnip());
         _menuPen = new WinForms.ToolStripMenuItem("Marker", null, (_, _) => SetMarker(_inkColor));
         _menuEraser = new WinForms.ToolStripMenuItem("Eraser", null, (_, _) => SetTool(Tool.Eraser));
         var colorItem = new WinForms.ToolStripMenuItem("Marker color…", null, (_, _) => PickColor());
@@ -310,6 +359,9 @@ public partial class MainWindow : Window, IBoardHost
         menu.Items.Add(_menuBoard);
         menu.Items.Add(_menuAmbient);
         menu.Items.Add(_menuHidden);
+        menu.Items.Add(new WinForms.ToolStripSeparator());
+        menu.Items.Add(noteItem);
+        menu.Items.Add(snipItem);
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add(_menuPen);
         menu.Items.Add(_menuEraser);
@@ -323,13 +375,15 @@ public partial class MainWindow : Window, IBoardHost
         {
             Icon = _appIcon ?? Drawing.SystemIcons.Application,
             Visible = true,
-            Text = "DeskBoard — Ctrl+Alt+D",
+            Text = "DeskBoard — Ctrl+Alt+ D board · A ink · H hide · N note",
             ContextMenuStrip = menu,
         };
         _trayIcon.MouseClick += (_, args) =>
         {
             if (args.Button == WinForms.MouseButtons.Left) ToggleMode();
         };
+        // A clicked reminder notification opens the board.
+        _trayIcon.BalloonTipClicked += (_, _) => ApplyMode(OverlayMode.Board);
         UpdateTrayIconState();
     }
 
@@ -413,6 +467,8 @@ public partial class MainWindow : Window, IBoardHost
         NativeMethods.UnregisterHotKey(_hwnd, HotkeyBoardId);
         NativeMethods.UnregisterHotKey(_hwnd, HotkeyAmbientId);
         NativeMethods.UnregisterHotKey(_hwnd, HotkeyHiddenId);
+        NativeMethods.UnregisterHotKey(_hwnd, HotkeyQuickNoteId);
+        NativeMethods.UnregisterHotKey(_hwnd, HotkeySnipId);
         if (_trayIcon is not null) { _trayIcon.Visible = false; _trayIcon.Dispose(); }
         _appIcon?.Dispose();
         Application.Current.Shutdown();

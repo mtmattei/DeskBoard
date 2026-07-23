@@ -24,15 +24,14 @@ opens a Calendar popup, overdue chips flush red, orange calendar magnet / R key 
 - Git: main @ 67a578c pushed to https://github.com/mtmattei/DeskBoard (root commit).
 
 ## Next actions (in order)
-1. User feel-pass: reminder magnet (orange calendar / R), chip → date picker,
-   overdue red state; magnet dragging + position persistence.
-2. Verify Hidden mode round-trip (Ctrl+Alt+H → Ctrl+Alt+D → Esc).
-3. Consider persisting the background-mode choice across launches (session-only).
-4. Polish backlog: multi-monitor, text-edit undo, reminder notifications
-   (currently visual-only — no toast when a date arrives).
+1. User feel-pass: quick note (Ctrl+Alt+N), snip (Ctrl+Alt+S), reminder toast +
+   Hidden-mode today strip (verified programmatically 2026-07-23: toast stamped
+   LastNotified, mode round-trip clean; strip visuals unseen — desktop was covered).
+2. Consider persisting the background-mode choice across launches (session-only).
+3. Polish backlog: multi-monitor (snip + board), text-edit undo, run-at-startup
+   toggle, first-run coach marks, board snapshots/PNG export, multiple boards.
 
 ## Open questions
-- Should reminders fire a Windows notification on the due date, or stay visual?
 - Should background-mode choice (Ambient vs Hidden) persist across restarts?
 - Move project out of OneDrive (bin/obj sync churn) now that it's on GitHub?
 

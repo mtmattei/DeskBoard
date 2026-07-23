@@ -46,7 +46,8 @@ public sealed class BoardItemModel
     public string? Asset { get; set; }      // image items: file name under assets\
     public string? Url { get; set; }        // link items
     public string? Path { get; set; }       // file items: absolute path
-    public DateTime? Due { get; set; }      // reminder items: target date
+    public DateTime? Due { get; set; }          // reminder items: target date
+    public DateTime? LastNotified { get; set; } // reminder items: last toast date (once/day)
 
     public BoardItemModel Clone() => (BoardItemModel)MemberwiseClone();
 }

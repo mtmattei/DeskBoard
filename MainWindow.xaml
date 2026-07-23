@@ -130,6 +130,14 @@
                              Visibility="Collapsed"
                              Opacity="0" />
 
+        <!-- Today strip: due/overdue reminders stay glanceable in Hidden mode -->
+        <StackPanel x:Name="TodayStrip"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Bottom"
+                    Margin="0,0,24,24"
+                    Visibility="Collapsed"
+                    IsHitTestVisible="False" />
+
         <!-- Zoom HUD chip -->
         <Border x:Name="ZoomHud"
                 HorizontalAlignment="Right" VerticalAlignment="Bottom"

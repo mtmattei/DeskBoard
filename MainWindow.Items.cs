@@ -193,8 +193,10 @@ public partial class MainWindow
             redo: () => { model.Due = date; RebuildItem(model); ScheduleSave(); });
 
         model.Due = date;
+        model.LastNotified = null; // a re-dated reminder earns a fresh notification
         RebuildItem(model);
         ScheduleSave();
+        UpdateTodayStrip();
     }
 
     // ---- Selection ----
@@ -690,5 +692,6 @@ public partial class MainWindow
     {
         bool empty = _mode == OverlayMode.Board && Ink.Strokes.Count == 0 && _items.Count == 0;
         Motion.Animate(EmptyHint, OpacityProperty, empty ? 1 : 0, Motion.Slow);
+        UpdateTodayStrip(); // item churn can add/remove due reminders
     }
 }

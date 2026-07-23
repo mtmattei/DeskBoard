@@ -27,13 +27,20 @@ screenshots).
 
 ## Use
 
-- **Ctrl+Alt+D** — toggle the board. Left-clicking the tray icon does the same.
-- **Three visibility modes** (right-click the tray icon):
-  - **Board** — the full whiteboard.
-  - **Ink on desktop** — board hidden, but ink and pinned content stay superimposed
-    on the wallpaper, click-through (default background state).
-  - **Hide everything** — nothing rendered; the hotkey stays live. Ctrl+Alt+D and
-    Esc/Hide return to whichever background state is checked.
+- **Global hotkeys** (work from anywhere, any mode):
+  - **Ctrl+Alt+D** — toggle the board (left-clicking the tray icon does the same).
+  - **Ctrl+Alt+A** — ink on desktop: board hidden, content superimposed on the
+    wallpaper, click-through (default background state).
+  - **Ctrl+Alt+H** — hide everything. Due/overdue reminders stay glanceable as a
+    compact strip in the bottom-right corner of the wallpaper.
+  - **Ctrl+Alt+N** — quick note: a floating sticky pops up; type, Enter, it's pinned
+    to the board without opening it.
+  - **Ctrl+Alt+S** — snip to board: drag a screen region and it lands as a taped
+    image, opening the board to show it.
+- **Reminders**: the reminder magnet (or **R**) adds a card with a calendar chip;
+  click the chip to set a date. The day it comes due, DeskBoard raises a Windows
+  notification (once per day; click it to open the board), and overdue chips turn
+  red.
 - **Marker rail** (full width along the bottom, Board mode):
   - Four markers — the active one lifts out of the tray, uncapped. Right-click a
     marker for a custom color.
