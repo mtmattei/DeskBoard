@@ -164,6 +164,8 @@ public partial class MainWindow
             case Key.B: SetTool(Tool.Marker); e.Handled = true; return;
             case Key.E: SetTool(Tool.Eraser); e.Handled = true; return;
             case Key.T: SetTool(Tool.Text); e.Handled = true; return;
+            case Key.A: SetShapeTool(ShapeKind.Arrow); e.Handled = true; return;
+            case Key.O: SetShapeTool(ShapeKind.Ellipse); e.Handled = true; return;
             case Key.N: AddNoteAtCenter(); e.Handled = true; return;
             case Key.R: AddReminderAtCenter(); e.Handled = true; return;
         }

@@ -1,5 +1,7 @@
 # DeskBoard
 
+![DeskBoard ambient mode — notes, images, and reminders pinned over the desktop](docs/ambient-mode.png)
+
 A full-screen whiteboard overlay for Windows 11. Toggle it on with a global hotkey and
 the screen becomes a dry-erase board set into a soft neumorphic frame, with a
 full-width brushed-steel marker rail along the bottom. Draw with chisel-nib markers, pin images and screenshots, stick notes, drop links
@@ -37,6 +39,9 @@ screenshots).
     to the board without opening it.
   - **Ctrl+Alt+S** — snip to board: drag a screen region and it lands as a taped
     image, opening the board to show it.
+- **Doodle shapes**: the slate magnets draw hand-drawn-style arrows, boxes, and
+  circles as real ink — drag to place (**A** arrow, **O** circle; Shift constrains
+  to straight/square/round). They erase and undo like any stroke.
 - **Reminders**: the reminder magnet (or **R**) adds a card with a calendar chip;
   click the chip to set a date. The day it comes due, DeskBoard raises a Windows
   notification (once per day; click it to open the board), and overdue chips turn

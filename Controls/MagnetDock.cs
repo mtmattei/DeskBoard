@@ -10,7 +10,7 @@ using DeskBoard.Rendering;
 
 namespace DeskBoard.Controls;
 
-public enum TrayTool { Select, Marker, Eraser, Text }
+public enum TrayTool { Select, Marker, Eraser, Text, ShapeArrow, ShapeRect, ShapeEllipse }
 
 /// <summary>
 /// The tool set as bold 3D fridge magnets stuck to the board: click activates,
@@ -28,6 +28,7 @@ public sealed class MagnetDock : Canvas
     public event Action? NoteRequested;
     public event Action? ReminderRequested;
     public event Action? ImageRequested;
+    public event Action<ShapeKind>? ShapePicked;
     public event Action? UndoRequested;
     public event Action? RedoRequested;
     public event Action? ClearRequested;
@@ -93,6 +94,14 @@ public sealed class MagnetDock : Canvas
             "Add a reminder (R)", () => ReminderRequested?.Invoke());
         AddMagnet("image", 46, Graphite, "\uE8B9", Colors.White,
             "Pin an image… (or paste / drop one)", () => ImageRequested?.Invoke());
+
+        var slate = Color.FromRgb(0x44, 0x62, 0x82);
+        AddMagnet("arrow", 42, slate, "\uE72A", Colors.White,
+            "Doodle arrow \u2014 drag on the board (A)", () => ShapePicked?.Invoke(ShapeKind.Arrow));
+        AddMagnet("rect", 42, slate, "\uE739", Colors.White,
+            "Doodle box \u2014 drag on the board", () => ShapePicked?.Invoke(ShapeKind.Rect));
+        AddMagnet("ellipse", 42, slate, "\uE91F", Colors.White,
+            "Doodle circle \u2014 drag on the board (O)", () => ShapePicked?.Invoke(ShapeKind.Ellipse));
 
         AddMagnet("undo", 42, Graphite, "\uE7A7", Colors.White, "Undo (Ctrl+Z)", () => UndoRequested?.Invoke());
         AddMagnet("redo", 42, Graphite, "\uE7A6", Colors.White, "Redo (Ctrl+Y)", () => RedoRequested?.Invoke());
@@ -271,6 +280,9 @@ public sealed class MagnetDock : Canvas
                 "eraser" => tool == TrayTool.Eraser,
                 "select" => tool == TrayTool.Select,
                 "text" => tool == TrayTool.Text,
+                "arrow" => tool == TrayTool.ShapeArrow,
+                "rect" => tool == TrayTool.ShapeRect,
+                "ellipse" => tool == TrayTool.ShapeEllipse,
                 _ when m.MarkerColor is not null =>
                     tool == TrayTool.Marker && markerColor.HasValue && m.MarkerColor.Value == markerColor.Value,
                 _ => false,
@@ -328,7 +340,7 @@ public sealed class MagnetDock : Canvas
         for (int i = 0; i < _magnets.Count; i++)
         {
             var m = _magnets[i];
-            if (i == 5 || i == 10) x += 18; // group gaps after eraser and image
+            if (i == 5 || i == 10 || i == 13) x += 18; // gaps: tools, shapes, actions
 
             double jitterY = ((i * 37) % 13) - 6;
             double left = x;

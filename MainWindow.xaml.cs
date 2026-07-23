@@ -33,7 +33,7 @@ public partial class MainWindow : Window, IBoardHost
     /// Ctrl+Alt+D toggles Board against whichever background mode is chosen.
     /// </summary>
     private enum OverlayMode { Hidden, Ambient, Board }
-    private enum Tool { Select, Marker, Eraser, Text }
+    private enum Tool { Select, Marker, Eraser, Text, Shape }
 
     private const int HotkeyBoardId = 0xB0A2;
     private const int HotkeyAmbientId = 0xB0A3;
@@ -94,6 +94,7 @@ public partial class MainWindow : Window, IBoardHost
         ConfigureInk();
         WireDock();
         WireInput();
+        WireShapeInput();
 
         SetTool(Tool.Marker);
         Log("---- MainWindow constructed (v2) ----");
@@ -296,7 +297,7 @@ public partial class MainWindow : Window, IBoardHost
             Tool.Eraser => InkCanvasEditingMode.EraseByStroke,
             _ => InkCanvasEditingMode.None,
         };
-        Ink.IsHitTestVisible = tool is Tool.Marker or Tool.Eraser or Tool.Text;
+        Ink.IsHitTestVisible = tool is Tool.Marker or Tool.Eraser or Tool.Text or Tool.Shape;
         ItemsCanvas.IsHitTestVisible = tool == Tool.Select;
 
         foreach (var item in _items)
@@ -307,6 +308,12 @@ public partial class MainWindow : Window, IBoardHost
             Tool.Select => TrayTool.Select,
             Tool.Eraser => TrayTool.Eraser,
             Tool.Text => TrayTool.Text,
+            Tool.Shape => _shapeKind switch
+            {
+                ShapeKind.Rect => TrayTool.ShapeRect,
+                ShapeKind.Ellipse => TrayTool.ShapeEllipse,
+                _ => TrayTool.ShapeArrow,
+            },
             _ => TrayTool.Marker,
         }, _inkColor);
 
@@ -330,6 +337,7 @@ public partial class MainWindow : Window, IBoardHost
         Dock.NoteRequested += () => AddNoteAtCenter();
         Dock.ReminderRequested += () => AddReminderAtCenter();
         Dock.ImageRequested += PickImageFile;
+        Dock.ShapePicked += SetShapeTool;
         Dock.UndoRequested += () => _undo.Undo();
         Dock.RedoRequested += () => _undo.Redo();
         Dock.ClearRequested += ClearBoard;
