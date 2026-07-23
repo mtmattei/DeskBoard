@@ -1,0 +1,149 @@
+<Window x:Class="DeskBoard.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:r="clr-namespace:DeskBoard.Rendering"
+        xmlns:controls="clr-namespace:DeskBoard.Controls"
+        Title="DeskBoard"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        ResizeMode="NoResize"
+        ShowInTaskbar="False"
+        Topmost="False"
+        WindowState="Maximized"
+        Stylus.IsPressAndHoldEnabled="False"
+        Stylus.IsFlicksEnabled="False"
+        Stylus.IsTapFeedbackEnabled="False">
+
+    <Grid x:Name="Root">
+
+        <!-- ============ Board surface (Board mode only) ============ -->
+        <Grid x:Name="BoardChrome" Visibility="Collapsed" Opacity="0" IsHitTestVisible="False">
+
+            <!-- Lit dry-erase surface: brighter center-top, cool corners -->
+            <Rectangle>
+                <Rectangle.Fill>
+                    <RadialGradientBrush Center="0.5,0.35" GradientOrigin="0.5,0.3"
+                                         RadiusX="0.85" RadiusY="0.85">
+                        <GradientStop Color="#FFFFFFFF" Offset="0.0" />
+                        <GradientStop Color="#FFF9FBFC" Offset="0.55" />
+                        <GradientStop Color="#FFEDF0F3" Offset="1.0" />
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Porcelain tooth -->
+            <Rectangle Fill="{x:Static r:TextureFactory.BoardNoise}" />
+
+            <!-- Soft top light sweep inside the frame -->
+            <Rectangle Height="240" VerticalAlignment="Top" Margin="14,14,14,0">
+                <Rectangle.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#2EFFFFFF" Offset="0" />
+                        <GradientStop Color="#00FFFFFF" Offset="1" />
+                    </LinearGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Corner vignette (keeps the surface from reading as flat white) -->
+            <Rectangle>
+                <Rectangle.Fill>
+                    <RadialGradientBrush Center="0.5,0.45" GradientOrigin="0.5,0.45"
+                                         RadiusX="0.78" RadiusY="0.85">
+                        <GradientStop Color="#00495056" Offset="0.72" />
+                        <GradientStop Color="#0D495056" Offset="1.0" />
+                    </RadialGradientBrush>
+                </Rectangle.Fill>
+            </Rectangle>
+
+            <!-- Acrylic frame: translucent tinted band with luminosity gradient, fine
+                 noise, and crisp hairline strokes around a rounded opening (the
+                 Windows 11 acrylic recipe, composed in-app). -->
+            <Path x:Name="NeuFrame" Fill="#C9F3F6F9" IsHitTestVisible="False" />
+            <Path x:Name="NeuFrameNoise" Fill="{x:Static r:TextureFactory.AcrylicNoise}"
+                  IsHitTestVisible="False" />
+            <Path x:Name="NeuFrameShade" IsHitTestVisible="False">
+                <Path.Fill>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#2EFFFFFF" Offset="0.0" />
+                        <GradientStop Color="#00FFFFFF" Offset="0.4" />
+                        <GradientStop Color="#0F2A3138" Offset="1.0" />
+                    </LinearGradientBrush>
+                </Path.Fill>
+            </Path>
+
+            <!-- Hairline stroke pair around the opening (dark outer, light inner) -->
+            <Border Margin="18" CornerRadius="12" BorderThickness="1"
+                    BorderBrush="#26000000" IsHitTestVisible="False" />
+            <Border Margin="19" CornerRadius="11" BorderThickness="1"
+                    BorderBrush="#59FFFFFF" IsHitTestVisible="False" />
+            <!-- Whisper of inset depth so the board still reads recessed -->
+            <Border Margin="18" CornerRadius="12" BorderThickness="6" IsHitTestVisible="False">
+                <Border.BorderBrush>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                        <GradientStop Color="#0C46505A" Offset="0.0" />
+                        <GradientStop Color="#0046505A" Offset="0.6" />
+                    </LinearGradientBrush>
+                </Border.BorderBrush>
+            </Border>
+        </Grid>
+
+        <!-- ============ Content viewport (zoom/pan) ============ -->
+        <Grid x:Name="Viewport" ClipToBounds="True">
+            <Grid x:Name="BoardContent" HorizontalAlignment="Left" VerticalAlignment="Top">
+                <Grid.RenderTransform>
+                    <TransformGroup>
+                        <ScaleTransform x:Name="ZoomScale" />
+                        <TranslateTransform x:Name="PanTranslate" />
+                    </TransformGroup>
+                </Grid.RenderTransform>
+
+                <Canvas x:Name="ItemsCanvas" Background="Transparent" />
+                <InkCanvas x:Name="Ink" Background="Transparent" />
+                <Canvas x:Name="SelectionLayer" IsHitTestVisible="False" />
+            </Grid>
+        </Grid>
+
+        <!-- Empty-board hint -->
+        <TextBlock x:Name="EmptyHint"
+                   Text="grab a marker magnet — or paste and drop anything onto the board"
+                   FontFamily="Ink Free, Segoe Print, Comic Sans MS"
+                   FontSize="30"
+                   Foreground="#97A0AA"
+                   HorizontalAlignment="Center" VerticalAlignment="Center"
+                   Margin="0,0,0,120"
+                   Opacity="0"
+                   IsHitTestVisible="False" />
+
+        <!-- Drop-target ring -->
+        <Border x:Name="DropRing"
+                Margin="24"
+                BorderBrush="{StaticResource AccentRingFaint}"
+                BorderThickness="2"
+                CornerRadius="10"
+                Visibility="Collapsed"
+                IsHitTestVisible="False" />
+
+        <!-- Tool magnets: bold 3D fridge magnets, draggable anywhere on the board.
+             Null background keeps everything between them click-through. -->
+        <controls:MagnetDock x:Name="Dock"
+                             Visibility="Collapsed"
+                             Opacity="0" />
+
+        <!-- Zoom HUD chip -->
+        <Border x:Name="ZoomHud"
+                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                Margin="0,0,26,26"
+                Background="#D9262B31"
+                CornerRadius="6"
+                Padding="10,5"
+                Opacity="0"
+                IsHitTestVisible="False">
+            <TextBlock x:Name="ZoomHudText"
+                       Text="100%"
+                       FontFamily="Segoe UI Variable Text, Segoe UI"
+                       FontSize="12"
+                       Foreground="White" />
+        </Border>
+    </Grid>
+</Window>

@@ -1,0 +1,138 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:po="http://schemas.microsoft.com/winfx/2006/xaml/presentation/options"
+                    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                    mc:Ignorable="po">
+
+    <!-- ================= Motion (house curves — default WPF easing is banned) ================= -->
+    <KeySpline x:Key="EaseSmooth" ControlPoint1="0.22,1" ControlPoint2="0.36,1" />
+    <KeySpline x:Key="EaseOut"    ControlPoint1="0.17,1" ControlPoint2="0.32,1" />
+    <KeySpline x:Key="EaseInOut"  ControlPoint1="0.66,0" ControlPoint2="0.34,1" />
+
+    <!-- ================= Palette ================= -->
+    <Color x:Key="AccentColor">#2E6FE0</Color>
+    <SolidColorBrush x:Key="AccentBrush"        Color="#2E6FE0" po:Freeze="True" />
+    <SolidColorBrush x:Key="AccentRing"         Color="#CC2E6FE0" po:Freeze="True" />
+    <SolidColorBrush x:Key="AccentRingFaint"    Color="#4D2E6FE0" po:Freeze="True" />
+    <SolidColorBrush x:Key="ChromeText"         Color="#28303A" po:Freeze="True" />
+    <SolidColorBrush x:Key="ChromeTextDim"      Color="#6B7683" po:Freeze="True" />
+    <SolidColorBrush x:Key="HairlineLight"      Color="#B8FFFFFF" po:Freeze="True" />
+    <SolidColorBrush x:Key="HairlineDark"       Color="#1F000000" po:Freeze="True" />
+
+    <!-- Board surface -->
+    <Color x:Key="BoardBase">#FBFCFD</Color>
+    <Color x:Key="BoardCorner">#EEF1F4</Color>
+
+    <!-- ================= Tray button (icon glyph on brushed metal) ================= -->
+    <Style x:Key="TrayToolButton" TargetType="Button">
+        <Setter Property="Width" Value="26" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Margin" Value="2,0" />
+        <Setter Property="Foreground" Value="#333A42" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Focusable" Value="True" />
+        <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
+        <Setter Property="RenderTransform">
+            <Setter.Value>
+                <ScaleTransform ScaleX="1" ScaleY="1" />
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="bd" CornerRadius="5"
+                                Background="#00FFFFFF"
+                                BorderBrush="#00FFFFFF" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border x:Name="focus" CornerRadius="6" Margin="-2"
+                                BorderBrush="{StaticResource AccentRing}" BorderThickness="1.5"
+                                Opacity="0" IsHitTestVisible="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#59FFFFFF" />
+                            <Setter TargetName="bd" Property="BorderBrush" Value="#66FFFFFF" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#33202830" />
+                        </Trigger>
+                        <Trigger Property="IsKeyboardFocused" Value="True">
+                            <Setter TargetName="focus" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.4" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <!-- Tactile press: scale to 0.98, fast (150ms) on the house curve. -->
+            <Trigger Property="IsPressed" Value="True">
+                <Trigger.EnterActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleX">
+                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98" KeySpline="{StaticResource EaseSmooth}" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleY">
+                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98" KeySpline="{StaticResource EaseSmooth}" />
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.EnterActions>
+                <Trigger.ExitActions>
+                    <BeginStoryboard>
+                        <Storyboard>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleX">
+                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="1" KeySpline="{StaticResource EaseSmooth}" />
+                            </DoubleAnimationUsingKeyFrames>
+                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleY">
+                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="1" KeySpline="{StaticResource EaseSmooth}" />
+                            </DoubleAnimationUsingKeyFrames>
+                        </Storyboard>
+                    </BeginStoryboard>
+                </Trigger.ExitActions>
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+
+    <!-- Active-tool variant: subtle pressed-in well so the current tool reads at a glance. -->
+    <Style x:Key="TrayToolButtonActive" TargetType="Button" BasedOn="{StaticResource TrayToolButton}">
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="bd" CornerRadius="6"
+                                Background="#2E202830"
+                                BorderBrush="#26000000" BorderThickness="1">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <Border CornerRadius="6" BorderBrush="#40FFFFFF" BorderThickness="0,0,0,1"
+                                IsHitTestVisible="False" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bd" Property="Background" Value="#3A202830" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Board context menu: light, quiet, hairline-edged. -->
+    <Style x:Key="BoardContextMenu" TargetType="ContextMenu">
+        <Setter Property="Background" Value="#F7F9FA" />
+        <Setter Property="BorderBrush" Value="#26000000" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
+        <Setter Property="FontSize" Value="12.5" />
+        <Setter Property="Foreground" Value="{StaticResource ChromeText}" />
+    </Style>
+
+</ResourceDictionary>
