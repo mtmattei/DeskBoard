@@ -85,7 +85,7 @@ internal sealed class BoardItemView : Grid
         Children.Add(_content.Root);
         if (_content.Decor is not null) Children.Add(_content.Decor);
 
-        var accent = Color.FromRgb(0x2E, 0x6F, 0xE0);
+        var accent = Color.FromRgb(0x5B, 0x7B, 0x9C);
 
         _hoverRing = MakeRing(Color.FromArgb(0x4D, accent.R, accent.G, accent.B), 1);
         _selRing = MakeRing(Color.FromArgb(0xCC, accent.R, accent.G, accent.B), 1);

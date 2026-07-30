@@ -21,7 +21,6 @@ public sealed class BoardStorage
         Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "DeskBoard");
     public static readonly string StrokesPath = Path.Combine(Dir, "board.isf");
     public static readonly string ItemsPath = Path.Combine(Dir, "board.json");
-    public static readonly string MagnetsPath = Path.Combine(Dir, "magnets.json");
     public static readonly string AssetsDir = Path.Combine(Dir, "assets");
 
     private static readonly JsonSerializerOptions JsonOpts = new()
@@ -74,8 +73,12 @@ public sealed class BoardStorage
         try
         {
             Directory.CreateDirectory(Dir);
-            using var fs = File.Create(StrokesPath);
-            strokes.Save(fs);
+            // Write-to-temp + atomic rename: a process kill mid-save can never
+            // leave a truncated board file behind.
+            string tmp = StrokesPath + ".tmp";
+            using (var fs = File.Create(tmp))
+                strokes.Save(fs);
+            File.Move(tmp, StrokesPath, overwrite: true);
         }
         catch { /* best-effort */ }
     }
@@ -109,8 +112,10 @@ public sealed class BoardStorage
         try
         {
             Directory.CreateDirectory(Dir);
-            File.WriteAllText(ItemsPath,
+            string tmp = ItemsPath + ".tmp";
+            File.WriteAllText(tmp,
                 JsonSerializer.Serialize(new BoardDocument { Items = items }, JsonOpts));
+            File.Move(tmp, ItemsPath, overwrite: true);
         }
         catch { /* best-effort */ }
     }
@@ -151,32 +156,6 @@ public sealed class BoardStorage
             }
         }
         return result;
-    }
-
-    /// <summary>Tool-magnet positions (id → [left, top]); null when never saved.</summary>
-    public Dictionary<string, double[]>? LoadMagnets()
-    {
-        try
-        {
-            if (!File.Exists(MagnetsPath)) return null;
-            return JsonSerializer.Deserialize<Dictionary<string, double[]>>(
-                File.ReadAllText(MagnetsPath));
-        }
-        catch
-        {
-            Quarantine(MagnetsPath);
-            return null;
-        }
-    }
-
-    public void SaveMagnets(Dictionary<string, double[]> positions)
-    {
-        try
-        {
-            Directory.CreateDirectory(Dir);
-            File.WriteAllText(MagnetsPath, JsonSerializer.Serialize(positions));
-        }
-        catch { /* best-effort */ }
     }
 
     /// <summary>Writes a BitmapSource to assets\ and returns the stored file name.</summary>

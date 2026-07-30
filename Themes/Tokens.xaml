@@ -9,115 +9,114 @@
     <KeySpline x:Key="EaseOut"    ControlPoint1="0.17,1" ControlPoint2="0.32,1" />
     <KeySpline x:Key="EaseInOut"  ControlPoint1="0.66,0" ControlPoint2="0.34,1" />
 
-    <!-- ================= Palette ================= -->
-    <Color x:Key="AccentColor">#2E6FE0</Color>
-    <SolidColorBrush x:Key="AccentBrush"        Color="#2E6FE0" po:Freeze="True" />
-    <SolidColorBrush x:Key="AccentRing"         Color="#CC2E6FE0" po:Freeze="True" />
-    <SolidColorBrush x:Key="AccentRingFaint"    Color="#4D2E6FE0" po:Freeze="True" />
-    <SolidColorBrush x:Key="ChromeText"         Color="#28303A" po:Freeze="True" />
-    <SolidColorBrush x:Key="ChromeTextDim"      Color="#6B7683" po:Freeze="True" />
-    <SolidColorBrush x:Key="HairlineLight"      Color="#B8FFFFFF" po:Freeze="True" />
-    <SolidColorBrush x:Key="HairlineDark"       Color="#1F000000" po:Freeze="True" />
+    <!-- ================= Palette: warm paper studio ================= -->
+    <!-- Canvas is warm off-white paper; chrome floats on it as soft cream pills. -->
+    <Color x:Key="PaperCenter">#F4F1EA</Color>
+    <Color x:Key="PaperEdge">#E8E4DA</Color>
 
-    <!-- Board surface -->
-    <Color x:Key="BoardBase">#FBFCFD</Color>
-    <Color x:Key="BoardCorner">#EEF1F4</Color>
+    <SolidColorBrush x:Key="CardBrush"      Color="#F8F6F0" po:Freeze="True" />
+    <SolidColorBrush x:Key="CardBorder"     Color="#E5E0D3" po:Freeze="True" />
+    <SolidColorBrush x:Key="InkStrong"      Color="#3B372F" po:Freeze="True" />
+    <SolidColorBrush x:Key="InkDim"         Color="#8D877A" po:Freeze="True" />
+    <SolidColorBrush x:Key="DarkFill"       Color="#2B2823" po:Freeze="True" />
+    <SolidColorBrush x:Key="DarkFillHover"  Color="#3D3931" po:Freeze="True" />
+    <SolidColorBrush x:Key="PaperText"      Color="#F4F1EA" po:Freeze="True" />
+    <SolidColorBrush x:Key="HoverTint"      Color="#122F2A20" po:Freeze="True" />
+    <SolidColorBrush x:Key="PressTint"      Color="#1F2F2A20" po:Freeze="True" />
+    <SolidColorBrush x:Key="ActiveTint"     Color="#EBE7DA" po:Freeze="True" />
+    <SolidColorBrush x:Key="DividerBrush"   Color="#E0DACC" po:Freeze="True" />
 
-    <!-- ================= Tray button (icon glyph on brushed metal) ================= -->
-    <Style x:Key="TrayToolButton" TargetType="Button">
-        <Setter Property="Width" Value="26" />
-        <Setter Property="Height" Value="26" />
-        <Setter Property="Margin" Value="2,0" />
-        <Setter Property="Foreground" Value="#333A42" />
-        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
-        <Setter Property="FontSize" Value="12.5" />
+    <!-- Selection / affordance accent: muted slate blue, sits quietly on warm paper. -->
+    <Color x:Key="AccentColor">#5B7B9C</Color>
+    <SolidColorBrush x:Key="AccentBrush"     Color="#5B7B9C" po:Freeze="True" />
+    <SolidColorBrush x:Key="AccentRing"      Color="#CC5B7B9C" po:Freeze="True" />
+    <SolidColorBrush x:Key="AccentRingFaint" Color="#4D5B7B9C" po:Freeze="True" />
+
+    <!-- Kept keys (item chrome relies on them) -->
+    <SolidColorBrush x:Key="ChromeText"    Color="#3B372F" po:Freeze="True" />
+    <SolidColorBrush x:Key="ChromeTextDim" Color="#8D877A" po:Freeze="True" />
+    <SolidColorBrush x:Key="HairlineLight" Color="#B8FFFFFF" po:Freeze="True" />
+    <SolidColorBrush x:Key="HairlineDark"  Color="#1F000000" po:Freeze="True" />
+
+    <!-- ================= Shadows (single soft pass + hairline border = floating card) ===== -->
+    <DropShadowEffect x:Key="ShadowCard" po:Freeze="True"
+                      Color="#4A4132" Opacity="0.20" BlurRadius="26" ShadowDepth="6" Direction="270" />
+    <DropShadowEffect x:Key="ShadowSmall" po:Freeze="True"
+                      Color="#4A4132" Opacity="0.18" BlurRadius="12" ShadowDepth="3" Direction="270" />
+
+    <!-- ================= Floating card (pill / panel) ================= -->
+    <Style x:Key="ChromeCard" TargetType="Border">
+        <Setter Property="Background" Value="{StaticResource CardBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="Effect" Value="{StaticResource ShadowCard}" />
+    </Style>
+
+    <!-- ================= Tactile press storyboards (scale 0.98, 150ms house curve) ========= -->
+    <Storyboard x:Key="PressIn">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleX">
+            <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98" KeySpline="{StaticResource EaseSmooth}" />
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleY">
+            <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98" KeySpline="{StaticResource EaseSmooth}" />
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+    <Storyboard x:Key="PressOut">
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleX">
+            <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="1" KeySpline="{StaticResource EaseSmooth}" />
+        </DoubleAnimationUsingKeyFrames>
+        <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleY">
+            <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="1" KeySpline="{StaticResource EaseSmooth}" />
+        </DoubleAnimationUsingKeyFrames>
+    </Storyboard>
+
+    <!-- Base for every chrome button: hand cursor, 0.98 press scale. -->
+    <Style x:Key="ChromeButtonBase" TargetType="Button">
         <Setter Property="Cursor" Value="Hand" />
-        <Setter Property="Focusable" Value="True" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Background" Value="Transparent" />
         <Setter Property="RenderTransformOrigin" Value="0.5,0.5" />
         <Setter Property="RenderTransform">
             <Setter.Value>
                 <ScaleTransform ScaleX="1" ScaleY="1" />
             </Setter.Value>
         </Setter>
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Grid>
-                        <Border x:Name="bd" CornerRadius="5"
-                                Background="#00FFFFFF"
-                                BorderBrush="#00FFFFFF" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <Border x:Name="focus" CornerRadius="6" Margin="-2"
-                                BorderBrush="{StaticResource AccentRing}" BorderThickness="1.5"
-                                Opacity="0" IsHitTestVisible="False" />
-                    </Grid>
-                    <ControlTemplate.Triggers>
-                        <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="#59FFFFFF" />
-                            <Setter TargetName="bd" Property="BorderBrush" Value="#66FFFFFF" />
-                        </Trigger>
-                        <Trigger Property="IsPressed" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="#33202830" />
-                        </Trigger>
-                        <Trigger Property="IsKeyboardFocused" Value="True">
-                            <Setter TargetName="focus" Property="Opacity" Value="1" />
-                        </Trigger>
-                        <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Opacity" Value="0.4" />
-                        </Trigger>
-                    </ControlTemplate.Triggers>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
         <Style.Triggers>
-            <!-- Tactile press: scale to 0.98, fast (150ms) on the house curve. -->
             <Trigger Property="IsPressed" Value="True">
                 <Trigger.EnterActions>
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleX">
-                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98" KeySpline="{StaticResource EaseSmooth}" />
-                            </DoubleAnimationUsingKeyFrames>
-                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleY">
-                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="0.98" KeySpline="{StaticResource EaseSmooth}" />
-                            </DoubleAnimationUsingKeyFrames>
-                        </Storyboard>
-                    </BeginStoryboard>
+                    <BeginStoryboard Storyboard="{StaticResource PressIn}" />
                 </Trigger.EnterActions>
                 <Trigger.ExitActions>
-                    <BeginStoryboard>
-                        <Storyboard>
-                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleX">
-                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="1" KeySpline="{StaticResource EaseSmooth}" />
-                            </DoubleAnimationUsingKeyFrames>
-                            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="RenderTransform.ScaleY">
-                                <SplineDoubleKeyFrame KeyTime="0:0:0.15" Value="1" KeySpline="{StaticResource EaseSmooth}" />
-                            </DoubleAnimationUsingKeyFrames>
-                        </Storyboard>
-                    </BeginStoryboard>
+                    <BeginStoryboard Storyboard="{StaticResource PressOut}" />
                 </Trigger.ExitActions>
             </Trigger>
         </Style.Triggers>
     </Style>
 
-    <!-- Active-tool variant: subtle pressed-in well so the current tool reads at a glance. -->
-    <Style x:Key="TrayToolButtonActive" TargetType="Button" BasedOn="{StaticResource TrayToolButton}">
+    <!-- ================= Round icon button (light) ================= -->
+    <Style x:Key="ChromeIconButton" TargetType="Button" BasedOn="{StaticResource ChromeButtonBase}">
+        <Setter Property="Width" Value="34" />
+        <Setter Property="Height" Value="34" />
+        <Setter Property="Foreground" Value="{StaticResource InkStrong}" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
                     <Grid>
-                        <Border x:Name="bd" CornerRadius="6"
-                                Background="#2E202830"
-                                BorderBrush="#26000000" BorderThickness="1">
-                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
-                        </Border>
-                        <Border CornerRadius="6" BorderBrush="#40FFFFFF" BorderThickness="0,0,0,1"
-                                IsHitTestVisible="False" />
+                        <Ellipse x:Name="bg" Fill="{TemplateBinding Background}" />
+                        <Ellipse x:Name="hover" Fill="{StaticResource HoverTint}" Opacity="0" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Grid>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter TargetName="bd" Property="Background" Value="#3A202830" />
+                            <Setter TargetName="hover" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="hover" Property="Fill" Value="{StaticResource PressTint}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -125,14 +124,274 @@
         </Setter>
     </Style>
 
-    <!-- Board context menu: light, quiet, hairline-edged. -->
+    <!-- Free-standing circular button on a card of its own (top corners, fit). -->
+    <Style x:Key="ChromeFloatButton" TargetType="Button" BasedOn="{StaticResource ChromeButtonBase}">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="Foreground" Value="{StaticResource InkStrong}" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="Background" Value="{StaticResource CardBrush}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Ellipse x:Name="bg" Fill="{TemplateBinding Background}"
+                                 Stroke="{StaticResource CardBorder}" StrokeThickness="1"
+                                 Effect="{StaticResource ShadowSmall}" />
+                        <Ellipse x:Name="hover" Fill="{StaticResource HoverTint}" Opacity="0" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="hover" Property="Fill" Value="{StaticResource PressTint}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Dark circular button (share / primary action). -->
+    <Style x:Key="ChromeDarkButton" TargetType="Button" BasedOn="{StaticResource ChromeFloatButton}">
+        <Setter Property="Background" Value="{StaticResource DarkFill}" />
+        <Setter Property="Foreground" Value="{StaticResource PaperText}" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Ellipse x:Name="bg" Fill="{TemplateBinding Background}"
+                                 Effect="{StaticResource ShadowSmall}" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="bg" Property="Fill" Value="{StaticResource DarkFillHover}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ================= Right rail button (icon over tiny label) ================= -->
+    <!-- Background is the active-state well; the window sets it to ActiveTint / Transparent. -->
+    <Style x:Key="ChromeRailButton" TargetType="Button" BasedOn="{StaticResource ChromeButtonBase}">
+        <Setter Property="Width" Value="56" />
+        <Setter Property="Padding" Value="0,7" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="active" CornerRadius="14"
+                                Background="{TemplateBinding Background}" />
+                        <Border x:Name="hover" CornerRadius="14"
+                                Background="{StaticResource HoverTint}" Opacity="0" />
+                        <ContentPresenter Margin="{TemplateBinding Padding}"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="hover" Property="Background" Value="{StaticResource PressTint}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="RailIcon" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="17" />
+        <Setter Property="Foreground" Value="{StaticResource InkStrong}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+    </Style>
+
+    <Style x:Key="RailLabel" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
+        <Setter Property="FontSize" Value="10" />
+        <Setter Property="Foreground" Value="{StaticResource InkDim}" />
+        <Setter Property="HorizontalAlignment" Value="Center" />
+        <Setter Property="Margin" Value="0,4,0,0" />
+    </Style>
+
+    <!-- ================= Pen slot (pen art pokes above the bar; active = raised white well) -->
+    <Style x:Key="ChromePenButton" TargetType="Button">
+        <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Focusable" Value="False" />
+        <Setter Property="Width" Value="46" />
+        <Setter Property="Height" Value="64" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Ellipse x:Name="well" Width="44" Height="44"
+                                 VerticalAlignment="Center"
+                                 Fill="#FDFCF9" Stroke="{StaticResource CardBorder}" StrokeThickness="1"
+                                 Effect="{StaticResource ShadowSmall}"
+                                 Opacity="0"
+                                 RenderTransform="{x:Null}" />
+                        <ContentPresenter x:Name="pen"
+                                          HorizontalAlignment="Center" VerticalAlignment="Center"
+                                          RenderTransformOrigin="0.5,0.5">
+                            <ContentPresenter.RenderTransform>
+                                <TranslateTransform x:Name="lift" Y="0" />
+                            </ContentPresenter.RenderTransform>
+                        </ContentPresenter>
+                        <Ellipse x:Name="dot" Width="4" Height="4"
+                                 Fill="{StaticResource InkStrong}"
+                                 VerticalAlignment="Bottom" HorizontalAlignment="Center"
+                                 Margin="0,0,0,3" Opacity="0" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="well" Property="Opacity" Value="0.45" />
+                        </Trigger>
+                        <!-- Active pen: well appears, pen lifts 6px, dot marks the slot. -->
+                        <Trigger Property="Tag" Value="On">
+                            <Setter TargetName="well" Property="Opacity" Value="1" />
+                            <Setter TargetName="dot" Property="Opacity" Value="1" />
+                            <Trigger.EnterActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="lift"
+                                                                       Storyboard.TargetProperty="Y">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.2" Value="-6"
+                                                                  KeySpline="{StaticResource EaseSmooth}" />
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.EnterActions>
+                            <Trigger.ExitActions>
+                                <BeginStoryboard>
+                                    <Storyboard>
+                                        <DoubleAnimationUsingKeyFrames Storyboard.TargetName="lift"
+                                                                       Storyboard.TargetProperty="Y">
+                                            <SplineDoubleKeyFrame KeyTime="0:0:0.2" Value="0"
+                                                                  KeySpline="{StaticResource EaseSmooth}" />
+                                        </DoubleAnimationUsingKeyFrames>
+                                    </Storyboard>
+                                </BeginStoryboard>
+                            </Trigger.ExitActions>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- ================= Color swatch (ring = current color) ================= -->
+    <Style x:Key="ChromeSwatch" TargetType="Button" BasedOn="{StaticResource ChromeButtonBase}">
+        <Setter Property="Width" Value="30" />
+        <Setter Property="Height" Value="30" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Ellipse x:Name="ring" Stroke="{StaticResource InkStrong}" StrokeThickness="1.5"
+                                 Opacity="0" />
+                        <Ellipse Width="22" Height="22"
+                                 Fill="{TemplateBinding Background}"
+                                 Stroke="#14000000" StrokeThickness="1" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="ring" Property="Opacity" Value="0.35" />
+                        </Trigger>
+                        <Trigger Property="Tag" Value="On">
+                            <Setter TargetName="ring" Property="Opacity" Value="1" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Shape/text buttons in the bottom bar: quiet icon, soft active well. -->
+    <Style x:Key="ChromeToolButton" TargetType="Button" BasedOn="{StaticResource ChromeButtonBase}">
+        <Setter Property="Width" Value="36" />
+        <Setter Property="Height" Value="36" />
+        <Setter Property="Foreground" Value="{StaticResource InkStrong}" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="15" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border x:Name="active" CornerRadius="10" Background="Transparent" />
+                        <Border x:Name="hover" CornerRadius="10"
+                                Background="{StaticResource HoverTint}" Opacity="0" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="hover" Property="Background" Value="{StaticResource PressTint}" />
+                        </Trigger>
+                        <Trigger Property="Tag" Value="On">
+                            <Setter TargetName="active" Property="Background" Value="{StaticResource ActiveTint}" />
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Opacity" Value="0.35" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <!-- Free-standing rounded-square button (fit, bento). -->
+    <Style x:Key="ChromeSquareButton" TargetType="Button" BasedOn="{StaticResource ChromeButtonBase}">
+        <Setter Property="Width" Value="44" />
+        <Setter Property="Height" Value="44" />
+        <Setter Property="Foreground" Value="{StaticResource InkStrong}" />
+        <Setter Property="FontFamily" Value="Segoe Fluent Icons, Segoe MDL2 Assets" />
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="Button">
+                    <Grid>
+                        <Border Style="{StaticResource ChromeCard}" CornerRadius="14" />
+                        <Border x:Name="hover" CornerRadius="14"
+                                Background="{StaticResource HoverTint}" Opacity="0" />
+                        <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="hover" Property="Opacity" Value="1" />
+                        </Trigger>
+                        <Trigger Property="IsPressed" Value="True">
+                            <Setter TargetName="hover" Property="Background" Value="{StaticResource PressTint}" />
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style x:Key="ChromeDivider" TargetType="Rectangle">
+        <Setter Property="Width" Value="1" />
+        <Setter Property="Height" Value="26" />
+        <Setter Property="Fill" Value="{StaticResource DividerBrush}" />
+        <Setter Property="Margin" Value="10,0" />
+    </Style>
+
+    <!-- Board context menu: warm paper, quiet, hairline-edged. -->
     <Style x:Key="BoardContextMenu" TargetType="ContextMenu">
-        <Setter Property="Background" Value="#F7F9FA" />
-        <Setter Property="BorderBrush" Value="#26000000" />
+        <Setter Property="Background" Value="{StaticResource CardBrush}" />
+        <Setter Property="BorderBrush" Value="{StaticResource CardBorder}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="FontFamily" Value="Segoe UI Variable Text, Segoe UI" />
         <Setter Property="FontSize" Value="12.5" />
-        <Setter Property="Foreground" Value="{StaticResource ChromeText}" />
+        <Setter Property="Foreground" Value="{StaticResource InkStrong}" />
     </Style>
 
 </ResourceDictionary>

@@ -33,11 +33,12 @@ internal static class BoardItemContent
     public static readonly FontFamily UiFont = new("Segoe UI Variable Text, Segoe UI");
     public static readonly FontFamily GlyphFont = new("Segoe Fluent Icons, Segoe MDL2 Assets");
 
-    private static readonly Brush CardBg = Frozen(new SolidColorBrush(Color.FromRgb(0xFE, 0xFE, 0xFE)));
-    private static readonly Brush CardRing = Frozen(new SolidColorBrush(Color.FromArgb(0x1C, 0, 0, 0)));
-    private static readonly Brush InkText = Frozen(new SolidColorBrush(Color.FromRgb(0x2F, 0x32, 0x37)));
-    private static readonly Brush DimText = Frozen(new SolidColorBrush(Color.FromRgb(0x6B, 0x76, 0x83)));
-    private static readonly Brush Accent = Frozen(new SolidColorBrush(Color.FromRgb(0x2E, 0x6F, 0xE0)));
+    // Warm paper theme — matches Themes/Tokens.xaml (CardBrush / InkStrong / InkDim / AccentBrush).
+    private static readonly Brush CardBg = Frozen(new SolidColorBrush(Color.FromRgb(0xFD, 0xFC, 0xF7)));
+    private static readonly Brush CardRing = Frozen(new SolidColorBrush(Color.FromArgb(0x24, 0x4A, 0x41, 0x32)));
+    private static readonly Brush InkText = Frozen(new SolidColorBrush(Color.FromRgb(0x3B, 0x37, 0x2F)));
+    private static readonly Brush DimText = Frozen(new SolidColorBrush(Color.FromRgb(0x8D, 0x87, 0x7A)));
+    private static readonly Brush Accent = Frozen(new SolidColorBrush(Color.FromRgb(0x5B, 0x7B, 0x9C)));
 
     public static ItemContent Build(BoardItemModel model) => model.Kind switch
     {
@@ -52,10 +53,10 @@ internal static class BoardItemContent
 
     public static Color PaperColor(NoteColor c) => c switch
     {
-        NoteColor.Blue => Color.FromRgb(0xBE, 0xE3, 0xF5),
-        NoteColor.Pink => Color.FromRgb(0xF8, 0xC8, 0xCF),
-        NoteColor.Green => Color.FromRgb(0xCD, 0xEB, 0xC5),
-        _ => Color.FromRgb(0xFF, 0xEE, 0x8C),
+        NoteColor.Blue => Color.FromRgb(0xC3, 0xD6, 0xE4),
+        NoteColor.Pink => Color.FromRgb(0xEA, 0xC5, 0xB9),
+        NoteColor.Green => Color.FromRgb(0xCF, 0xD8, 0xBA),
+        _ => Color.FromRgb(0xF2, 0xD0, 0x6B),
     };
 
     // ---- Sticky note: paper, adhesive band, bottom curl, folded corner ----
@@ -195,8 +196,8 @@ internal static class BoardItemContent
 
         bool overdue = due.Value.Date < DateTime.Today;
         var bandColor = overdue
-            ? Color.FromRgb(0xC2, 0x32, 0x2A)
-            : Color.FromRgb(0xE0, 0x5A, 0x33);
+            ? Color.FromRgb(0xB8, 0x45, 0x3C)
+            : Color.FromRgb(0xD9, 0x70, 0x4C);
 
         var stack = new Grid();
         stack.RowDefinitions.Add(new RowDefinition { Height = new GridLength(17) });
@@ -255,7 +256,7 @@ internal static class BoardItemContent
     private static ItemContent BuildText(BoardItemModel model)
     {
         var color = model.InkColor == 0
-            ? Color.FromRgb(0x1A, 0x1A, 0x1A)
+            ? Color.FromRgb(0x26, 0x26, 0x26)
             : Color.FromArgb((byte)(model.InkColor >> 24), (byte)(model.InkColor >> 16),
                              (byte)(model.InkColor >> 8), (byte)model.InkColor);
 
@@ -293,7 +294,7 @@ internal static class BoardItemContent
         else
         {
             // Unavailable state: neutral panel with an error glyph, never a broken image.
-            var panel = new Grid { Background = Frozen(new SolidColorBrush(Color.FromRgb(0xF0, 0xF2, 0xF4))) };
+            var panel = new Grid { Background = Frozen(new SolidColorBrush(Color.FromRgb(0xF0, 0xED, 0xE4))) };
             panel.Children.Add(new TextBlock
             {
                 Text = "\uE783",
@@ -387,7 +388,7 @@ internal static class BoardItemContent
         {
             Width = 34, Height = 34,
             CornerRadius = new CornerRadius(17),
-            Background = Frozen(new SolidColorBrush(Color.FromArgb(0x1A, 0x2E, 0x6F, 0xE0))),
+            Background = Frozen(new SolidColorBrush(Color.FromArgb(0x1F, 0x5B, 0x7B, 0x9C))),
             VerticalAlignment = VerticalAlignment.Center,
             Child = new TextBlock
             {
@@ -500,7 +501,7 @@ internal static class BoardItemContent
         BlurRadius = blur,
         ShadowDepth = depth,
         Direction = 270,
-        Color = Color.FromRgb(0x20, 0x24, 0x28),
+        Color = Color.FromRgb(0x4A, 0x41, 0x32),
         Opacity = opacity,
     };
 

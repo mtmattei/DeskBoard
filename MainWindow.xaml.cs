@@ -52,16 +52,15 @@ public partial class MainWindow : Window, IBoardHost
     private OverlayMode _mode = OverlayMode.Ambient;
     private OverlayMode _backgroundMode = OverlayMode.Ambient; // what "hide the board" returns to
     private Tool _tool = Tool.Marker;
-    private MediaColor _inkColor = MediaColor.FromRgb(0x1A, 0x1A, 0x1A);
+    private MediaColor _inkColor = MediaColor.FromRgb(0x26, 0x26, 0x26);
     private bool _loading;
 
     private readonly BoardStorage _storage = new();
     private readonly UndoStack _undo = new();
     private readonly List<BoardItemView> _items = new();
     private readonly DispatcherTimer _saveDebounce = new() { Interval = TimeSpan.FromSeconds(1.5) };
-    private readonly DispatcherTimer _zoomHudTimer = new() { Interval = TimeSpan.FromSeconds(1.2) };
 
-    private readonly TranslateTransform _dockLift = new();
+    private readonly TranslateTransform _chromeLift = new();
     private WinForms.NotifyIcon? _trayIcon;
     private Drawing.Icon? _appIcon;
     private WinForms.ToolStripMenuItem _menuBoard = null!;
@@ -81,36 +80,25 @@ public partial class MainWindow : Window, IBoardHost
         InitializeComponent();
 
         _saveDebounce.Tick += (_, _) => { _saveDebounce.Stop(); SaveAll(); };
-        _zoomHudTimer.Tick += (_, _) =>
-        {
-            _zoomHudTimer.Stop();
-            Motion.Animate(ZoomHud, OpacityProperty, 0, Motion.Slow);
-        };
         _storage.Error += msg => _trayIcon?.ShowBalloonTip(4000, "DeskBoard", msg, WinForms.ToolTipIcon.Warning);
-        _undo.Changed += () => Dock.SetUndoRedo(_undo.CanUndo, _undo.CanRedo);
+        _undo.Changed += UpdateUndoState;
 
-        Dock.RenderTransform = _dockLift;
+        ChromeLayer.RenderTransform = _chromeLift;
 
         ConfigureInk();
-        WireDock();
+        WireChrome();
         WireInput();
         WireShapeInput();
 
         SetTool(Tool.Marker);
+        UpdateUndoState();
         Log("---- MainWindow constructed (v2) ----");
     }
 
     private void ConfigureInk()
     {
-        // Chisel-nib marker: rectangular tip, slightly taller than wide, smoothed to
-        // Beziers. Pressure stays on for stylus input.
-        var da = Ink.DefaultDrawingAttributes;
-        da.StylusTip = StylusTip.Rectangle;
-        da.Width = 4.6;
-        da.Height = 7.6;
-        da.FitToCurve = true;
-        da.IgnorePressure = false;
-        da.Color = _inkColor;
+        // Default nib is the chisel marker; pen presets live in ApplyPenAttributes.
+        ApplyPenAttributes();
 
         Ink.Strokes.StrokesChanged += OnStrokesChanged;
         Ink.StrokeCollected += OnStrokeCollected;
@@ -131,7 +119,6 @@ public partial class MainWindow : Window, IBoardHost
         SetupTrayIcon();
         RegisterToggleHotkey();
         LoadBoard();
-        Dock.ApplyPositions(_storage.LoadMagnets());
         StartReminderWatch();
 
         ApplyMode(App.StartInBoardMode ? OverlayMode.Board : OverlayMode.Ambient);
@@ -197,12 +184,12 @@ public partial class MainWindow : Window, IBoardHost
                 NativeMethods.SWP_NOMOVE | NativeMethods.SWP_NOSIZE | NativeMethods.SWP_NOACTIVATE
                 | NativeMethods.SWP_FRAMECHANGED);
 
-            // Board fades away, magnets drop out.
+            // Board fades away, chrome drops out.
             Motion.Animate(BoardChrome, OpacityProperty, 0, Motion.Normal,
                 completed: () => BoardChrome.Visibility = Visibility.Collapsed);
-            Motion.Animate(Dock, OpacityProperty, 0, Motion.Fast,
-                completed: () => Dock.Visibility = Visibility.Collapsed);
-            Motion.Animate(_dockLift, TranslateTransform.YProperty, 12, Motion.Fast);
+            Motion.Animate(ChromeLayer, OpacityProperty, 0, Motion.Fast,
+                completed: () => ChromeLayer.Visibility = Visibility.Collapsed);
+            Motion.Animate(_chromeLift, TranslateTransform.YProperty, 12, Motion.Fast);
             Motion.Animate(EmptyHint, OpacityProperty, 0, Motion.Fast);
 
             if (mode == OverlayMode.Hidden)
@@ -231,13 +218,14 @@ public partial class MainWindow : Window, IBoardHost
             BoardChrome.Visibility = Visibility.Visible;
             Motion.Animate(BoardChrome, OpacityProperty, 1, Motion.Slow);
 
-            Dock.Visibility = Visibility.Visible;
-            _dockLift.Y = Motion.Enabled ? 12 : 0;
-            Motion.Animate(Dock, OpacityProperty, 1, Motion.Slow);
-            Motion.Animate(_dockLift, TranslateTransform.YProperty, 0, Motion.Slow);
+            ChromeLayer.Visibility = Visibility.Visible;
+            _chromeLift.Y = Motion.Enabled ? 12 : 0;
+            Motion.Animate(ChromeLayer, OpacityProperty, 1, Motion.Slow);
+            Motion.Animate(_chromeLift, TranslateTransform.YProperty, 0, Motion.Slow);
 
             Ink.Focus();
             UpdateEmptyHint();
+            UpdateZoomUi();
         }
 
         Log($"ApplyMode={mode}");
@@ -303,47 +291,15 @@ public partial class MainWindow : Window, IBoardHost
         foreach (var item in _items)
             item.RefreshToolState();
 
-        Dock.SetActiveTool(tool switch
-        {
-            Tool.Select => TrayTool.Select,
-            Tool.Eraser => TrayTool.Eraser,
-            Tool.Text => TrayTool.Text,
-            Tool.Shape => _shapeKind switch
-            {
-                ShapeKind.Rect => TrayTool.ShapeRect,
-                ShapeKind.Ellipse => TrayTool.ShapeEllipse,
-                _ => TrayTool.ShapeArrow,
-            },
-            _ => TrayTool.Marker,
-        }, _inkColor);
-
+        UpdateChromeToolState();
         UpdateTrayIconState();
     }
 
     private void SetMarker(MediaColor color)
     {
         _inkColor = color;
-        Ink.DefaultDrawingAttributes.Color = color;
+        ApplyPenAttributes();
         SetTool(Tool.Marker);
-    }
-
-    private void WireDock()
-    {
-        Dock.MarkerPicked += SetMarker;
-        Dock.CustomColorRequested += _ => PickColor();
-        Dock.EraserPicked += () => SetTool(Tool.Eraser);
-        Dock.SelectPicked += () => SetTool(Tool.Select);
-        Dock.TextPicked += () => SetTool(Tool.Text);
-        Dock.NoteRequested += () => AddNoteAtCenter();
-        Dock.ReminderRequested += () => AddReminderAtCenter();
-        Dock.ImageRequested += PickImageFile;
-        Dock.ShapePicked += SetShapeTool;
-        Dock.UndoRequested += () => _undo.Undo();
-        Dock.RedoRequested += () => _undo.Redo();
-        Dock.ClearRequested += ClearBoard;
-        Dock.HideRequested += () => ApplyMode(_backgroundMode);
-        Dock.PositionsChanged += p => _storage.SaveMagnets(p);
-        Dock.SetUndoRedo(false, false);
     }
 
     // ---- System tray icon ----

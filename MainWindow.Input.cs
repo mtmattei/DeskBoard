@@ -54,22 +54,7 @@ public partial class MainWindow
         {
             BoardContent.Width = e.NewSize.Width;
             BoardContent.Height = e.NewSize.Height;
-            UpdateFrameGeometry(e.NewSize.Width, e.NewSize.Height);
         };
-    }
-
-    /// <summary>Frame band = screen rect minus a rounded inner opening (radius 12).</summary>
-    private void UpdateFrameGeometry(double w, double h)
-    {
-        if (w <= 40 || h <= 40) return;
-        var geometry = new CombinedGeometry(
-            GeometryCombineMode.Exclude,
-            new RectangleGeometry(new Rect(0, 0, w, h)),
-            new RectangleGeometry(new Rect(18, 18, w - 36, h - 36), 12, 12));
-        geometry.Freeze();
-        NeuFrame.Data = geometry;
-        NeuFrameNoise.Data = geometry;
-        NeuFrameShade.Data = geometry;
     }
 
     // ---- Keyboard ----
@@ -141,7 +126,7 @@ public partial class MainWindow
             case Key.D0 when ctrl:
             case Key.NumPad0 when ctrl:
                 ResetView();
-                ShowZoomHud();
+                UpdateZoomUi();
                 e.Handled = true;
                 return;
             case Key.OemPlus when ctrl:
@@ -238,13 +223,14 @@ public partial class MainWindow
         ZoomScale.ScaleX = _zoom;
         ZoomScale.ScaleY = _zoom;
         SetPan(tx, ty);
-        ShowZoomHud();
+        UpdateZoomUi();
     }
 
     private void SetPan(double tx, double ty)
     {
         PanTranslate.X = Math.Clamp(tx, Viewport.ActualWidth * (1 - _zoom), 0);
         PanTranslate.Y = Math.Clamp(ty, Viewport.ActualHeight * (1 - _zoom), 0);
+        UpdateMinimap();
     }
 
     private void ResetView()
@@ -252,14 +238,7 @@ public partial class MainWindow
         _zoom = 1.0;
         ZoomScale.ScaleX = ZoomScale.ScaleY = 1.0;
         PanTranslate.X = PanTranslate.Y = 0;
-    }
-
-    private void ShowZoomHud()
-    {
-        ZoomHudText.Text = $"{Math.Round(_zoom * 100)}%";
-        Motion.Animate(ZoomHud, OpacityProperty, 1, Motion.Fast);
-        _zoomHudTimer.Stop();
-        _zoomHudTimer.Start();
+        UpdateMinimap();
     }
 
     private void OnPreviewMouseDownForPan(object sender, MouseButtonEventArgs e)
@@ -308,9 +287,9 @@ public partial class MainWindow
         _marqueeStart = e.GetPosition(ItemsCanvas);
         _marqueeRect = new Rectangle
         {
-            Stroke = new SolidColorBrush(MediaColor.FromArgb(0xCC, 0x2E, 0x6F, 0xE0)),
+            Stroke = new SolidColorBrush(MediaColor.FromArgb(0xCC, 0x5B, 0x7B, 0x9C)),
             StrokeThickness = 1,
-            Fill = new SolidColorBrush(MediaColor.FromArgb(0x14, 0x2E, 0x6F, 0xE0)),
+            Fill = new SolidColorBrush(MediaColor.FromArgb(0x14, 0x5B, 0x7B, 0x9C)),
         };
         SelectionLayer.Children.Add(_marqueeRect);
         Canvas.SetLeft(_marqueeRect, _marqueeStart.X);
